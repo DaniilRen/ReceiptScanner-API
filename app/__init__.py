@@ -13,10 +13,11 @@ def create_app():
 	app.register_blueprint(routing.router)
 	app.add_url_rule("/", endpoint="index")
 
-	logging_manager.set_logging(
-		config_path=app.config["LOGGING_CONFIG"],
-		logs_path=app.config["LOGS"]
-		)
+	""" Custom logs work badly with gunicorn. instead you can use gunicorn logger to stdout """
+	# logging_manager.set_logging(
+	# 	config_path=app.config["LOGGING_CONFIG"],
+	# 	logs_path=app.config["LOGS"]
+	# 	)
 
 	if not os.path.exists(app.config["DATABASE"]):
 		db.init_db(conf=app.config)
