@@ -67,6 +67,20 @@ def add_item():
 	return '', 204
 
 
+@router.route('/update-item', methods=("POST",))
+@jwt_required()
+def update_item():
+	data = request.get_json()
+	if not data or 'image' not in data:
+		return jsonify({'error': 'some data is missing'}), 404
+
+	item_id = data.get('id')
+	response = db.update_item(item_id, data)
+	if response is None:
+		jsonify({'error': 'item already exists or data is corrupted'}), 404
+	return '', 204
+
+
 @router.route('/delete-item/<id>', methods=("DELETE",))
 @jwt_required()
 def delete_item(id):

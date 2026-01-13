@@ -50,7 +50,7 @@ def generate_default_items(db, count=5):
 
 		categories = ["ГСМ топливо", "Товары", "Услуги"]
 		dates = ["2025-07-"+f"{day}".zfill(2) for day in range(1, 31)]
-		images = ["sample_" + str(i+1) + '.png' for i in range(count)]
+		images = ["sample.png" for _ in range(count)]
 		items = [
 			{"category": choice(categories), "sum": randint(100, 4242), "creation_date": choice(dates), "file_name": images[i]} for i in range(count)
 		]

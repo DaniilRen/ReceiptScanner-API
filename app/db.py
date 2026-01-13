@@ -72,6 +72,54 @@ def add_item(data):
 		return None
 
 
+""" Encode file to base64 string"""
+def encode_base64(file_path):
+	with open(file_path, "rb") as f:
+		return base64.b64encode(f.read()).decode("utf-8")
+
+
+def update_item(id, data):
+	try:
+		current_item = get_item_by_id(id)
+		if not current_item:
+			return None
+		
+		db = get_db()
+		b64_string = data['image']
+		current_filename = current_item['file_name']
+		storage_path = os.path.join(current_app.root_path, current_app.config['FILE_STORAGE'])
+		old_file_path = os.path.join(storage_path, current_filename)
+
+		if encode_base64(old_file_path) != b64_string:
+			if os.path.exists(old_file_path):
+				items_with_similar_attachment = check_attachment(id, current_filename)
+				if items_with_similar_attachment is None:
+					return None
+				if len(items_with_similar_attachment) == 1:
+					print("> removing old file")
+					os.remove(old_file_path)
+				else:
+					print("> keep item`s image | have same attachment :", len(items_with_similar_attachment))
+
+			filename = f"upd_{id}_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.png"
+			if not upload_file(b64_string, filename):
+				print("! Error while uploading new image")
+				return None
+		else:
+			filename = current_filename
+		
+		db.execute(
+			"UPDATE items SET category = ?, sum = ?, creation_date = ?, file_name = ? WHERE id = ?",
+			(data['category'], data["sum"], data["creation_date"], filename, id)
+		)
+		db.commit()
+		return True
+	except Exception as e:
+		print(f"Update error: {e}")
+		return None
+
+
+
 """ check is there are other items using this photo """
 def check_attachment(id: int, filename: str):
 	try:	
